@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FENT FOLD - Clothing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --theme-color: #ffffff; /* Carti white */
+    }
+
+    html, body { 
+      height: 100%; 
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background: #000;
+      color: var(--theme-color);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* full-screen background video */
+    video.bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      display: none;
+    }
+
+    /* subtle dark overlay on top of video */
+    .video-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: -1;
+      display: none;
+    }
+
+    /* splash overlay */
+    #splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      z-index: 60;
+      cursor: pointer;
+    }
+    
+    #splash h2 {
+      color: #ffffff;
+      text-shadow: 0 0 12px #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: .4px;
+    }
+
+    /* Navigation */
+    .nav-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 50;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+    
+    .nav-container > * {
+      pointer-events: auto;
+    }
+    
+    .brand-nav {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--theme-color);
+      text-shadow: 0 0 16px rgba(0,0,0,0.6), 0 0 18px var(--theme-color);
+      text-decoration: none;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+    
+    .nav-link {
+      color: var(--theme-color);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+      transition: opacity 0.3s;
+    }
+    
+    .nav-link:hover {
+      opacity: 0.7;
+    }
+    
+    .cart-icon {
+      position: relative;
+      color: var(--theme-color);
+      font-size: 20px;
+      filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+    }
+    
+    .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--theme-color);
+      color: #000;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Store content */
+    .store-container {
+      padding-top: 100px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    
+    .collection-title {
+      font-size: 48px;
+      font-weight: 800;
+      margin: 40px 0;
+      text-align: center;
+      color: var(--theme-color);
+      text-shadow: 0 0 16px rgba(0,0,0,0.6), 0 0 18px var(--theme-color);
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 40px;
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto 80px;
+    }
+    
+    .product-card {
+      background: rgba(20, 20, 20, 0.7);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .product-image {
+      width: 100%;
+      height: 350px;
+      object-fit: cover;
+      background: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+    }
+    
+    .product-info {
+      padding: 20px;
+    }
+    
+    .product-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 10px;
+      color: var(--theme-color);
+    }
+    
+    .product-price {
+      font-size: 16px;
+      margin: 0 0 15px;
+      color: #fff;
+    }
+    
+    .add-to-cart {
+      background: var(--theme-color);
+      color: #000;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.3s;
+    }
+    
+    .add-to-cart:hover {
+      opacity: 0.8;
+    }
+    
+    /* Cart sidebar */
+    .cart-sidebar {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 350px;
+      height: 100vh;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: 20px;
+      transition: right 0.4s ease;
+      overflow-y: auto;
+    }
+    
+    .cart-sidebar.open {
+      right: 0;
+    }
+    
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 15px;
+    }
+    
+    .cart-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+    }
+    
+    .close-cart {
+      background: none;
+      border: none;
+      color: var(--theme-color);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    .cart-items {
+      margin-bottom: 20px;
+    }
+    
+    .cart-item {
+      display: flex;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .cart-item-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 15px;
+      border-radius: 6px;
+      background: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 12px;
+    }
+    
+    .cart-item-details {
+      flex: 1;
+    }
+    
+    .cart-item-title {
+      font-size: 14px;
+      margin: 0 0 5px;
+    }
+    
+    .cart-item-price {
+      font-size: 14px;
+      margin: 0 0 10px;
+      color: #fff;
+    }
+    
+    .cart-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .quantity-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--theme-color);
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .remove-item {
+      background: none;
+      border: none;
+      color: #ff5555;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: auto;
+    }
+    
+    .cart-total {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 20px 0;
+      text-align: right;
+    }
+    
+    .checkout-btn {
+      background: var(--theme-color);
+      color: #000;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.3s;
+    }
+    
+    .checkout-btn:hover {
+      opacity: 0.8;
+    }
+    
+    /* Footer */
+    .footer {
+      padding: 40px 20px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.8);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+    
+    .footer-link {
+      color: var(--theme-color);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .footer-text {
+      color: #888;
+      font-size: 14px;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+      }
+      
+      .collection-title {
+        font-size: 36px;
+      }
+      
+      .cart-sidebar {
+        width: 300px;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .collection-title {
+        font-size: 28px;
+      }
+      
+      .cart-sidebar {
+        width: 100%;
+        right: -100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- background video -->
+  <video id="bg-video" class="bg-video" playsinline muted loop>
+    <source src="https://assets.mixkit.co/videos/preview/mixkit-close-up-of-a-woman-walking-through-a-dark-alley-43755-large.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <div id="video-overlay" class="video-overlay"></div>
+
+  <!-- splash screen -->
+  <div id="splash">
+    <h2>ENTER STORE</h2>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-container">
+    <a href="#" class="brand-nav">FENT FOLD</a>
+    <div class="nav-links">
+      <a href="#" class="nav-link">FENTISBACK</a>
+      <a href="#" class="nav-link">FENTISBACK</a>
+      <a href="#" class="nav-link">FENTISBACK</a>
+      <a href="#" class="nav-link">FENTISBACK</a>
+    </div>
+    <div class="cart-icon" id="cart-icon">
+      <i class="fas fa-shopping-bag"></i>
+      <span class="cart-count">0</span>
+    </div>
+  </div>
+
+  <!-- Store Content -->
+  <div class="store-container" id="store-container">
+    <h1 class="collection-title">COMING SOON</h1>
+    
+    <div class="products-grid" id="products-grid">
+      <!-- Products will be dynamically added here -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-links">
+      <a href="#" class="footer-link">FENTISBACK</a>
+      <a href="#" class="footer-link">FENTISBACKs</a>
+      <a href="#" class="footer-link" link="">Contact</a>
+      <a href="#" class="footer-link">FENTISBACK</a>
+    </div>
+    <p class="footer-text">© 2023 FENTFOLD.COM. All rights reserved.</p>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h2 class="cart-title">YOUR CART</h2>
+      <button class="close-cart" id="close-cart"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <!-- Cart items will be dynamically added here -->
+    </div>
+    <div class="cart-total">TOTAL: $<span id="cart-total">0</span></div>
+    <button class="checkout-btn">CHECKOUT</button>
+  </div>
+
+  <script>
+    // Product data with placeholder images
+    const products = [
+      {
+        id: 1,
+        name: "FENTTFOLD",
+        price: 90210,
+        image: "fnt.jpg"
+      },
+      {
+        id: 2,
+        name: "FENTFOLD",
+        price: 90210,
+        image: "fnt.jpg"
+      },
+      {
+        id: 3,
+        name: "FENTFOLD",
+        price: 90210,
+        image: "fnt.jpg"
+      },
+      {
+        id: 4,
+        name: "FENTFOLD",
+        price: 90210,
+        image: "fnt.jpg"
+      },
+      {
+        id: 5,
+        name: "FENTFOLD",
+        price: 90210,
+        image: "fnt.jpg"
+      },
+      {
+        id: 6,
+        name: "FENTFOLD",
+        price: 90210,
+        image: "fnt.jpg"
+      }
+    ];
+
+    // Cart functionality
+    let cart = [];
+    
+    // DOM elements
+    const splash = document.getElementById('splash');
+    const storeContainer = document.getElementById('store-container');
+    const video = document.getElementById('bg-video');
+    const overlay = document.getElementById('video-overlay');
+    const productsGrid = document.getElementById('products-grid');
+    const cartIcon = document.getElementById('cart-icon');
+    const cartSidebar = document.getElementById('cart-sidebar');
+    const closeCart = document.getElementById('close-cart');
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const cartCount = document.querySelector('.cart-count');
+
+    // Initialize the store
+    function initStore() {
+      // Render products
+      products.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        productCard.innerHTML = `
+          <div class="product-image">
+            <img src="${product.image}" alt="${product.name}" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div class="product-info">
+            <h3 class="product-title">${product.name}</h3>
+            <p class="product-price">$${product.price}</p>
+            <button class="add-to-cart" data-id="${product.id}">ADD TO CART</button>
+          </div>
+        `;
+        productsGrid.appendChild(productCard);
+      });
+
+      // Add event listeners to add to cart buttons
+      document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+          const productId = parseInt(this.getAttribute('data-id'));
+          addToCart(productId);
+        });
+      });
+    }
+
+    // Cart functions
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      const existingItem = cart.find(item => item.id === productId);
+      
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          ...product,
+          quantity: 1
+        });
+      }
+      
+      updateCartUI();
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      // Update cart count
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartCount.textContent = totalItems;
+      
+      // Update cart items
+      cartItems.innerHTML = '';
+      let totalPrice = 0;
+      
+      cart.forEach(item => {
+        totalPrice += item.price * item.quantity;
+        
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        cartItem.innerHTML = `
+          <div class="cart-item-image">
+            <img src="${item.image}" alt="${item.name}" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div class="cart-item-details">
+            <h4 class="cart-item-title">${item.name}</h4>
+            <p class="cart-item-price">$${item.price}</p>
+            <div class="cart-item-actions">
+              <button class="quantity-btn minus" data-id="${item.id}">-</button>
+              <span>${item.quantity}</span>
+              <button class="quantity-btn plus" data-id="${item.id}">+</button>
+              <button class="remove-item" data-id="${item.id}">Remove</button>
+            </div>
+          </div>
+        `;
+        cartItems.appendChild(cartItem);
+      });
+      
+      // Update total price
+      cartTotal.textContent = totalPrice.toFixed(2);
+      
+      // Add event listeners to cart item buttons
+      document.querySelectorAll('.quantity-btn.minus').forEach(button => {
+        button.addEventListener('click', function() {
+          const productId = parseInt(this.getAttribute('data-id'));
+          const item = cart.find(item => item.id === productId);
+          if (item.quantity > 1) {
+            item.quantity -= 1;
+          } else {
+            removeFromCart(productId);
+          }
+          updateCartUI();
+        });
+      });
+      
+      document.querySelectorAll('.quantity-btn.plus').forEach(button => {
+        button.addEventListener('click', function() {
+          const productId = parseInt(this.getAttribute('data-id'));
+          const item = cart.find(item => item.id === productId);
+          item.quantity += 1;
+          updateCartUI();
+        });
+      });
+      
+      document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function() {
+          const productId = parseInt(this.getAttribute('data-id'));
+          removeFromCart(productId);
+        });
+      });
+    }
+
+    // show main & unmute video after splash click
+    splash.addEventListener('click', function onSplash() {
+      try {
+        // Hide splash
+        splash.style.display = 'none';
+        // Show video and overlay
+        overlay.style.display = 'block';
+        video.style.display = 'block';
+        // Show store content
+        storeContainer.style.opacity = '1';
+        storeContainer.style.pointerEvents = 'auto';
+
+        // Unmute the video
+        video.muted = false;
+
+        // If not playing for some reason, play it
+        if (video.paused) {
+          video.play().catch(err => console.warn('Play after splash failed:', err));
+        }
+      } catch (e) {
+        console.error('Splash click error:', e);
+        // Ensure UI is still usable even if video fails
+        splash.style.display = 'none';
+        storeContainer.style.opacity = '1';
+        storeContainer.style.pointerEvents = 'auto';
+        video.style.display = 'none';
+        document.body.style.background = '#000';
+      }
+
+      splash.removeEventListener('click', onSplash);
+    });
+
+    // Cart functionality
+    cartIcon.addEventListener('click', () => {
+      cartSidebar.classList.add('open');
+    });
+
+    closeCart.addEventListener('click', () => {
+      cartSidebar.classList.remove('open');
+    });
+
+    // video error handling
+    video.addEventListener('error', (ev) => {
+      console.error('Video playback error:', ev);
+      video.style.display = 'none';
+      document.body.style.background = '#000';
+    });
+
+    // Initialize the application
+    initStore();
+  </script>
+</body>
+</html>
